@@ -4,6 +4,7 @@ import time
 import requests
 import psutil
 from datetime import datetime
+from monitor.alert_manager import create_alert
 
 STATUS_FILE = "data/status.json"
 LOG_FILE = "logs/trading.log"
@@ -77,16 +78,30 @@ while True:
                     error_count += 1
 
     last_tick_time = get_last_tick_time()
-    if last_tick_time is None:
-        alerts.append("Market data tick unavailable")
 
     overall_status = "READY" if all(value == "OK" for value in services.values()) else "DEGRADED"
 
     alerts = []
 
+    if last_tick_time is None:
+        alerts.append("Market data tick unavailable")
+
     for service_name, service_status in services.items():
         if service_status != "OK":
             alerts.append(f"{service_name} is unreachable")
+
+            if service_name == "database":
+                create_alert(
+                    severity="CRITICAL",
+                    service="Database",
+                    issue="Database unreachable",
+                    impact="Trading should not start",
+                    suggested_actions=[
+                        "Check database process",
+                        "Restart database service",
+                        "Rerun pre-market check"
+                    ]
+                )
 
     if system["cpu_percent"] > 80:
         alerts.append("CPU usage high")
