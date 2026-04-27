@@ -107,6 +107,14 @@ while True:
                     impact="Trading should not start",
                     suggested_actions=get_runbook("DATABASE_UNREACHABLE")
                 )
+            else:
+                create_alert(
+                    severity="CRITICAL",
+                    service=service_name,
+                    issue=f"{service_name} unreachable",
+                    impact="Trading system component is unavailable",
+                    suggested_actions=get_runbook("SERVICE_UNREACHABLE")
+                )
     for service_name, latency in latency_ms.items():
         if latency is not None and latency > 100:
             alerts.append(f"{service_name} latency high")
@@ -116,11 +124,7 @@ while True:
                 service=service_name,
                 issue=f"High latency detected: {latency} ms",
                 impact="Trading system response may be slow",
-                suggested_actions=[
-                    "Check service health endpoint",
-                    "Check system CPU and memory usage",
-                    "Review logs for latency warnings"
-                ]
+                suggested_actions=get_runbook("HIGH_LATENCY")
             )
 
     if system["cpu_percent"] > 80:
@@ -131,11 +135,7 @@ while True:
             service="System",
             issue=f"CPU usage high: {system['cpu_percent']}%",
             impact="Trading system performance may be affected",
-            suggested_actions=[
-                "Check running processes",
-                "Stop unnecessary background tasks",
-                "Monitor CPU usage again"
-            ]
+            suggested_actions=get_runbook("CPU_USAGE_HIGH")
         )
 
     if system["memory_percent"] > 90:
@@ -146,11 +146,7 @@ while True:
             service="System",
             issue=f"Memory usage high: {system['memory_percent']}%",
             impact="Trading services may slow down or fail",
-            suggested_actions=[
-                "Check memory-heavy processes",
-                "Restart unnecessary services",
-                "Monitor memory usage again"
-            ]
+            suggested_actions=get_runbook("MEMORY_USAGE_HIGH")
         )
 
     if system["disk_percent"] > 80:
@@ -161,11 +157,7 @@ while True:
             service="System",
             issue=f"Disk usage high: {system['disk_percent']}%",
             impact="Logs or system files may fail to write",
-            suggested_actions=[
-                "Check logs directory size",
-                "Delete temporary files",
-                "Confirm disk usage is below threshold"
-            ]
+            suggested_actions=get_runbook("DISK_USAGE_HIGH")
         )
 
     if error_count > 0:
@@ -176,11 +168,7 @@ while True:
             service="Logs",
             issue=f"{error_count} ERROR/CRITICAL log entries found",
             impact="Trading system may have unresolved incidents",
-            suggested_actions=[
-                "Open logs/trading.log",
-                "Check latest ERROR or CRITICAL entries",
-                "Fix the root cause before market open"
-            ]
+            suggested_actions=get_runbook("LOG_ERRORS_FOUND")
         )
 
     readiness_score = 100
