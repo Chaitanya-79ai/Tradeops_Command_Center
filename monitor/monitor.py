@@ -133,11 +133,47 @@ while True:
     if system["cpu_percent"] > 80:
         alerts.append("CPU usage high")
 
+        create_alert(
+            severity="WARN",
+            service="System",
+            issue=f"CPU usage high: {system['cpu_percent']}%",
+            impact="Trading system performance may be affected",
+            suggested_actions=[
+                "Check running processes",
+                "Stop unnecessary background tasks",
+                "Monitor CPU usage again"
+            ]
+        )
+
     if system["memory_percent"] > 90:
         alerts.append("Memory usage high")
 
+        create_alert(
+            severity="WARN",
+            service="System",
+            issue=f"Memory usage high: {system['memory_percent']}%",
+            impact="Trading services may slow down or fail",
+            suggested_actions=[
+                "Check memory-heavy processes",
+                "Restart unnecessary services",
+                "Monitor memory usage again"
+            ]
+        )
+
     if system["disk_percent"] > 80:
         alerts.append("Disk usage high")
+
+        create_alert(
+            severity="WARN",
+            service="System",
+            issue=f"Disk usage high: {system['disk_percent']}%",
+            impact="Logs or system files may fail to write",
+            suggested_actions=[
+                "Check logs directory size",
+                "Delete temporary files",
+                "Confirm disk usage is below threshold"
+            ]
+        )
 
     if error_count > 0:
         alerts.append(f"{error_count} log errors found")
