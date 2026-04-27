@@ -92,11 +92,7 @@ while True:
             service="Market Data",
             issue="Market data tick unavailable",
             impact="Trading should not start without live market data",
-            suggested_actions=[
-                "Check market data service health endpoint",
-                "Restart market data service",
-                "Verify latest tick timestamp"
-            ]
+            suggested_actions=get_runbook("MARKET_DATA_TICK_UNAVAILABLE")
         )
 
     for service_name, service_status in services.items():

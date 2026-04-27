@@ -6,6 +6,12 @@ RUNBOOKS = {
         "Restart database service",
         "Rerun pre-market check",
     ],
+    "MARKET_DATA_TICK_UNAVAILABLE": [
+        "Check market data service health endpoint",
+        "Restart market data service",
+        "Verify latest tick timestamp",
+        "Inform trading desk if unresolved",
+    ],
 }
 
 
