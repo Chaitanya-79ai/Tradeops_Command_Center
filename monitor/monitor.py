@@ -106,6 +106,18 @@ while True:
         if latency is not None and latency > 100:
             alerts.append(f"{service_name} latency high")
 
+            create_alert(
+                severity="WARN",
+                service=service_name,
+                issue=f"High latency detected: {latency} ms",
+                impact="Trading system response may be slow",
+                suggested_actions=[
+                    "Check service health endpoint",
+                    "Check system CPU and memory usage",
+                    "Review logs for latency warnings"
+                ]
+            )
+
     if system["cpu_percent"] > 80:
         alerts.append("CPU usage high")
 
