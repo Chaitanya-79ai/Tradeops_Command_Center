@@ -86,6 +86,18 @@ while True:
     if last_tick_time is None:
         alerts.append("Market data tick unavailable")
 
+        create_alert(
+            severity="CRITICAL",
+            service="Market Data",
+            issue="Market data tick unavailable",
+            impact="Trading should not start without live market data",
+            suggested_actions=[
+                "Check market data service health endpoint",
+                "Restart market data service",
+                "Verify latest tick timestamp"
+            ]
+        )
+
     for service_name, service_status in services.items():
         if service_status != "OK":
             alerts.append(f"{service_name} is unreachable")
