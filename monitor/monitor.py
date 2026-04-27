@@ -178,6 +178,18 @@ while True:
     if error_count > 0:
         alerts.append(f"{error_count} log errors found")
 
+        create_alert(
+            severity="CRITICAL",
+            service="Logs",
+            issue=f"{error_count} ERROR/CRITICAL log entries found",
+            impact="Trading system may have unresolved incidents",
+            suggested_actions=[
+                "Open logs/trading.log",
+                "Check latest ERROR or CRITICAL entries",
+                "Fix the root cause before market open"
+            ]
+        )
+
     readiness_score = 100
 
     for service_status in services.values():
