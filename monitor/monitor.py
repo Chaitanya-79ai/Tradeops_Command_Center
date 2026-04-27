@@ -5,6 +5,7 @@ import requests
 import psutil
 from datetime import datetime
 from monitor.alert_manager import create_alert
+from monitor.runbook_engine import get_runbook
 
 STATUS_FILE = "data/status.json"
 LOG_FILE = "logs/trading.log"
@@ -108,11 +109,7 @@ while True:
                     service="Database",
                     issue="Database unreachable",
                     impact="Trading should not start",
-                    suggested_actions=[
-                        "Check database process",
-                        "Restart database service",
-                        "Rerun pre-market check"
-                    ]
+                    suggested_actions=get_runbook("DATABASE_UNREACHABLE")
                 )
     for service_name, latency in latency_ms.items():
         if latency is not None and latency > 100:
