@@ -1,0 +1,3 @@
+market: NSE
+symbol: NIFTY
+environment: local_simulation

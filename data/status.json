@@ -1,0 +1,27 @@
+{
+  "overall_status": "DEGRADED",
+  "services": {
+    "market_data": "OK",
+    "risk_service": "OK",
+    "order_gateway": "OK",
+    "database": "FAIL"
+  },
+  "system": {
+    "cpu_percent": 8.1,
+    "memory_percent": 55.6,
+    "disk_percent": 8.4
+  },
+  "latency_ms": {
+    "market_data": 1,
+    "risk_service": 1,
+    "order_gateway": 1
+  },
+  "error_count": 0,
+  "order_rejection_rate": 0,
+  "last_tick_time": "2026-04-27T11:34:02.343670",
+  "alerts": [
+    "database is unreachable"
+  ],
+  "readiness_score": 75,
+  "last_updated": "2026-04-27T11:34:02.344412"
+}
