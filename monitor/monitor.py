@@ -102,6 +102,9 @@ while True:
                         "Rerun pre-market check"
                     ]
                 )
+    for service_name, latency in latency_ms.items():
+        if latency is not None and latency > 100:
+            alerts.append(f"{service_name} latency high")
 
     if system["cpu_percent"] > 80:
         alerts.append("CPU usage high")
