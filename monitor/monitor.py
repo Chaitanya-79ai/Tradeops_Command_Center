@@ -6,6 +6,7 @@ import psutil
 from datetime import datetime
 from monitor.alert_manager import create_alert
 from monitor.runbook_engine import get_runbook
+from database.db_manager import save_service_health, check_database_health
 
 STATUS_FILE = "data/status.json"
 LOG_FILE = "logs/trading.log"
@@ -16,6 +17,7 @@ SERVICE_URLS = {
     "order_gateway": "http://127.0.0.1:8003/health"
 }
 TICK_URL = "http://127.0.0.1:8001/tick"
+
 
 def check_service(url):
     try:
@@ -32,7 +34,8 @@ def check_service(url):
 
     except requests.exceptions.RequestException:
         return "FAIL", None
-    
+
+
 def get_last_tick_time():
     try:
         response = requests.get(TICK_URL, timeout=2)
@@ -45,18 +48,24 @@ def get_last_tick_time():
 
     except requests.exceptions.RequestException:
         return None
-    
+
+
 while True:
     market_data_status, market_data_latency = check_service(SERVICE_URLS["market_data"])
     risk_service_status, risk_service_latency = check_service(SERVICE_URLS["risk_service"])
     order_gateway_status, order_gateway_latency = check_service(SERVICE_URLS["order_gateway"])
 
+    database_status = check_database_health()
+
     services = {
         "market_data": market_data_status,
         "risk_service": risk_service_status,
         "order_gateway": order_gateway_status,
-        "database": "FAIL"
+        "database": database_status
     }
+
+    for service_name, service_status in services.items():
+        save_service_health(service_name, service_status)
 
     latency_ms = {
         "market_data": market_data_latency,
@@ -115,6 +124,7 @@ while True:
                     impact="Trading system component is unavailable",
                     suggested_actions=get_runbook("SERVICE_UNREACHABLE")
                 )
+
     for service_name, latency in latency_ms.items():
         if latency is not None and latency > 100:
             alerts.append(f"{service_name} latency high")
@@ -211,3 +221,34 @@ while True:
 
     print("status.json updated")
     time.sleep(2)
+import sqlite3
+from datetime import datetime
+
+DB_FILE = "data/tradeops.db"
+
+
+def save_service_health(service_name, status):
+    connection = sqlite3.connect(DB_FILE)
+    cursor = connection.cursor()
+
+    cursor.execute(
+        """
+        INSERT INTO service_health (service_name, status, checked_at)
+        VALUES (?, ?, ?)
+        """,
+        (service_name, status, datetime.now().isoformat())
+    )
+
+    connection.commit()
+    connection.close()
+
+
+def check_database_health():
+    try:
+        connection = sqlite3.connect(DB_FILE)
+        cursor = connection.cursor()
+        cursor.execute("SELECT 1")
+        connection.close()
+        return "OK"
+    except sqlite3.Error:
+        return "FAIL"

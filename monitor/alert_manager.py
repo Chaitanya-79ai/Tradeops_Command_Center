@@ -1,4 +1,5 @@
 from datetime import datetime
+from database.db_manager import save_alert
 
 ALERT_LOG_FILE = "data/alerts.log"
 
@@ -32,6 +33,4 @@ Suggested Action:
     with open(ALERT_LOG_FILE, "a") as file:
         file.write(alert_message + "\n")
 
-
-
-
+    save_alert(severity, service, issue, impact)

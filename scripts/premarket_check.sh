@@ -1,11 +1,11 @@
 #!/bin/bash
-#!/bin/bash
 
 MARKET_DATA_URL="http://127.0.0.1:8001/health"
 RISK_SERVICE_URL="http://127.0.0.1:8002/health"
 ORDER_GATEWAY_URL="http://127.0.0.1:8003/health"
 
 LOG_FILE="logs/trading.log"
+DB_FILE="data/tradeops.db"
 
 OVERALL_STATUS="READY"
 
@@ -38,6 +38,14 @@ else
     REASONS="${REASONS}Order Gateway not reachable;"
 fi
 
+if [ -f "$DB_FILE" ] && sqlite3 "$DB_FILE" "SELECT 1;" > /dev/null 2>&1; then
+    echo "[OK] SQLite database reachable"
+else
+    echo "[FAIL] SQLite database not reachable"
+    OVERALL_STATUS="NOT READY"
+    REASONS="${REASONS}SQLite database not reachable;"
+fi
+
 DISK_USAGE=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
 
 if [ "$DISK_USAGE" -lt 80 ]; then
@@ -62,7 +70,7 @@ END {
 }')
 
 if [ "$MEMORY_USAGE" -lt 90 ]; then
-    echo "[OK] Memory usage below 80%"
+    echo "[OK] Memory usage below 90%"
 else
     echo "[FAIL] Memory usage is ${MEMORY_USAGE}%"
     OVERALL_STATUS="NOT READY"
@@ -101,4 +109,3 @@ else
     echo "FINAL STATUS: NOT READY"
     echo "Reason: $REASONS"
 fi
-
