@@ -1,0 +1,63 @@
+services:
+  market-data:
+    build: .
+    command: python3 -m uvicorn services.market_data_service:app --host 0.0.0.0 --port 8001
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    ports:
+      - "8001:8001"
+
+  risk-service:
+    build: .
+    command: python3 -m uvicorn services.risk_service:app --host 0.0.0.0 --port 8002
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    ports:
+      - "8002:8002"
+
+  order-gateway:
+    build: .
+    command: python3 -m uvicorn services.order_gateway:app --host 0.0.0.0 --port 8003
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    ports:
+      - "8003:8003"
+
+  backend:
+    build: .
+    command: python3 -m uvicorn backend.main:app --host 0.0.0.0 --port 8000
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    ports:
+      - "8000:8000"
+
+  monitor:
+    build: .
+    command: python3 -m monitor.monitor
+    environment:
+      MARKET_DATA_URL: http://market-data:8001/health
+      RISK_SERVICE_URL: http://risk-service:8002/health
+      ORDER_GATEWAY_URL: http://order-gateway:8003/health
+      TICK_URL: http://market-data:8001/tick
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    depends_on:
+      - market-data
+      - risk-service
+      - order-gateway
+
+  dashboard:
+    build: .
+    command: streamlit run dashboard/app.py --server.address 0.0.0.0 --server.port 8501
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    ports:
+      - "8501:8501"
+    depends_on:
+      - monitor

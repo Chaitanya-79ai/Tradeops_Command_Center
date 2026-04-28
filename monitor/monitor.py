@@ -12,11 +12,11 @@ STATUS_FILE = "data/status.json"
 LOG_FILE = "logs/trading.log"
 
 SERVICE_URLS = {
-    "market_data": "http://127.0.0.1:8001/health",
-    "risk_service": "http://127.0.0.1:8002/health",
-    "order_gateway": "http://127.0.0.1:8003/health"
+    "market_data": os.getenv("MARKET_DATA_URL", "http://127.0.0.1:8001/health"),
+    "risk_service": os.getenv("RISK_SERVICE_URL", "http://127.0.0.1:8002/health"),
+    "order_gateway": os.getenv("ORDER_GATEWAY_URL", "http://127.0.0.1:8003/health")
 }
-TICK_URL = "http://127.0.0.1:8001/tick"
+TICK_URL = os.getenv("TICK_URL", "http://127.0.0.1:8001/tick")
 
 
 def check_service(url):
@@ -221,34 +221,3 @@ while True:
 
     print("status.json updated")
     time.sleep(2)
-import sqlite3
-from datetime import datetime
-
-DB_FILE = "data/tradeops.db"
-
-
-def save_service_health(service_name, status):
-    connection = sqlite3.connect(DB_FILE)
-    cursor = connection.cursor()
-
-    cursor.execute(
-        """
-        INSERT INTO service_health (service_name, status, checked_at)
-        VALUES (?, ?, ?)
-        """,
-        (service_name, status, datetime.now().isoformat())
-    )
-
-    connection.commit()
-    connection.close()
-
-
-def check_database_health():
-    try:
-        connection = sqlite3.connect(DB_FILE)
-        cursor = connection.cursor()
-        cursor.execute("SELECT 1")
-        connection.close()
-        return "OK"
-    except sqlite3.Error:
-        return "FAIL"
